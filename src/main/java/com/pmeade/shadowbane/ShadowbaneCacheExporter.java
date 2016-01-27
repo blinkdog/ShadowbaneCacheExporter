@@ -19,6 +19,7 @@
 package com.pmeade.shadowbane;
 
 import com.pmeade.shadowbane.sound.SoundCache;
+import com.pmeade.shadowbane.textures.TexturesCache;
 import java.io.File;
 
 /**
@@ -124,9 +125,22 @@ public class ShadowbaneCacheExporter implements Runnable {
             "ShadowbaneCacheExporter exported %d Sound resources.",
             soundCache.size()
         ));
+        soundCache = null;
         
         // TerrainAlpha.cache
+        // TODO: Implement TerrainAlphaCache
+        
         // Textures.cache
+        TexturesCache texturesCache = new TexturesCache(cache);
+        for(int i=0; i<texturesCache.size(); i++) {
+            texturesCache.export(i, output);
+        }
+        System.out.println(String.format(
+            "ShadowbaneCacheExporter exported %d Textures resources.",
+            texturesCache.size()
+        ));
+        texturesCache = null;
+        
         // Tile.cache
         // Visual.cache
     }

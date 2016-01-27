@@ -1,5 +1,5 @@
 /*
- * SoundCache.java
+ * TexturesCache.java
  * Copyright 2016 Patrick Meade.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,32 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.pmeade.shadowbane.sound;
+package com.pmeade.shadowbane.textures;
 
 import com.pmeade.shadowbane.CacheArchive;
 import com.pmeade.shadowbane.CacheResource;
 import java.io.File;
 
 /**
- * SoundCache represents "Sound.cache", the cache archive containing
- * Sound resources. This class provides a method to export a sound
+ * TexturesCache represents "Textures.cache", the cache archive containing
+ * Textures resources. This class provides a method to export a texture
  * resource to a file.
  * @author pmeade
  */
-public class SoundCache extends CacheArchive
+public class TexturesCache extends CacheArchive
 {
     /**
-     * Construct a SoundCache archive.
-     * @param cacheDir the cache directory, where Sound.cache is located
+     * Construct a TexturesCache archive.
+     * @param cacheDir the cache directory, where Textures.cache is located
      */
-    public SoundCache(File cacheDir) {
-        super(new File(cacheDir, "Sound.cache"));
+    public TexturesCache(File cacheDir) {
+        super(new File(cacheDir, "Textures.cache"));
         read();
     }
 
     /**
-     * Determine the number of resources present in the sound cache.
-     * @return the number of resources present in the sound cache
+     * Determine the number of resources present in the textures cache.
+     * @return the number of resources present in the textures cache
      */
     public int size() {
         return resources.size();
@@ -53,11 +53,11 @@ public class SoundCache extends CacheArchive
      * @param outputDir the output directory
      */
     public void export(int index, File outputDir) {
-        File resourceDir = new File(outputDir, "Sound");
+        File resourceDir = new File(outputDir, "Textures");
         resourceDir.mkdir();
         CacheResource resource = resources.get(index);
         loadResource(resource);
-        SoundResource sound = new SoundResource(resource);
-        sound.exportToWave(resourceDir);
+        TexturesResource texture = new TexturesResource(resource);
+        texture.exportToPng(resourceDir);
     }
 }
