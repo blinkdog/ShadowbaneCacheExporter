@@ -18,6 +18,7 @@
 
 package com.pmeade.shadowbane;
 
+import com.pmeade.shadowbane.sound.SoundCache;
 import java.io.File;
 
 /**
@@ -101,9 +102,33 @@ public class ShadowbaneCacheExporter implements Runnable {
     @Override
     public final void run() {
         System.out.println(String.format(
-            "I will examine %s and output resources to %s",
+            "ShadowbaneCacheExporter will examine %s and output resources to %s",
             cache.getAbsolutePath(), output.getAbsolutePath()
         ));
+        
+        // CObjects.cache
+        // CZone.cache
+        // Dungeon.cache
+        // Mesh.cache
+        // Motion.cache
+        // Palette.cache
+        // Render.cache
+        // Skeleton.cache
+        
+        // Sound.cache
+        SoundCache soundCache = new SoundCache(cache);
+        for(int i=0; i<soundCache.size(); i++) {
+            soundCache.export(i, output);
+        }
+        System.out.println(String.format(
+            "ShadowbaneCacheExporter exported %d Sound resources.",
+            soundCache.size()
+        ));
+        
+        // TerrainAlpha.cache
+        // Textures.cache
+        // Tile.cache
+        // Visual.cache
     }
 
     /**
