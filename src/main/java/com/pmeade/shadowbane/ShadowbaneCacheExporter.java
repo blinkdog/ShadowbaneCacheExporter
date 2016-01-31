@@ -18,6 +18,7 @@
 
 package com.pmeade.shadowbane;
 
+import com.pmeade.shadowbane.mesh.MeshCache;
 import com.pmeade.shadowbane.sound.SoundCache;
 import com.pmeade.shadowbane.textures.TexturesCache;
 import java.io.File;
@@ -30,7 +31,7 @@ import java.io.File;
 public class ShadowbaneCacheExporter implements Runnable {
     /** Standard code for successful program termination. */
     public static final int EXIT_SUCCESS = 0;
-    
+
     /** Standard code for program termination due to error. */
     public static final int EXIT_FAILURE = 1;
 
@@ -41,10 +42,10 @@ public class ShadowbaneCacheExporter implements Runnable {
     public static void main(final String[] args) {
         // if we weren't provided with enough arguments
         if(args.length < 2) {
-            System.out.println("Usage: java -jar ShadowbaneCacheExporter-X.Y.Z.jar /path/to/cache /path/to/output");
+            System.out.println("Usage: export-cache /path/to/cache /path/to/output");
             System.exit(EXIT_SUCCESS);
         }
-        
+
         // create and check the provided cache directory
         File cacheDir = new File(args[0]);
         if(cacheDir.exists() == false) {
@@ -92,7 +93,7 @@ public class ShadowbaneCacheExporter implements Runnable {
             ));
             System.exit(EXIT_FAILURE);
         }
-        
+
         // create and run the ShadowbaneCacheExporter
         ShadowbaneCacheExporter sce = new ShadowbaneCacheExporter();
         sce.setCache(cacheDir);
@@ -106,16 +107,27 @@ public class ShadowbaneCacheExporter implements Runnable {
             "ShadowbaneCacheExporter will examine %s and output resources to %s",
             cache.getAbsolutePath(), output.getAbsolutePath()
         ));
-        
+
         // CObjects.cache
         // CZone.cache
         // Dungeon.cache
+
         // Mesh.cache
+        MeshCache meshCache = new MeshCache(cache);
+        for(int i=0; i<meshCache.size(); i++) {
+            meshCache.export(i, output);
+        }
+        System.out.println(String.format(
+            "ShadowbaneCacheExporter exported %d Mesh resources.",
+            meshCache.size()
+        ));
+        meshCache = null;
+
         // Motion.cache
         // Palette.cache
         // Render.cache
         // Skeleton.cache
-        
+
         // Sound.cache
         SoundCache soundCache = new SoundCache(cache);
         for(int i=0; i<soundCache.size(); i++) {
@@ -126,10 +138,10 @@ public class ShadowbaneCacheExporter implements Runnable {
             soundCache.size()
         ));
         soundCache = null;
-        
+
         // TerrainAlpha.cache
         // TODO: Implement TerrainAlphaCache
-        
+
         // Textures.cache
         TexturesCache texturesCache = new TexturesCache(cache);
         for(int i=0; i<texturesCache.size(); i++) {
@@ -140,7 +152,7 @@ public class ShadowbaneCacheExporter implements Runnable {
             texturesCache.size()
         ));
         texturesCache = null;
-        
+
         // Tile.cache
         // Visual.cache
     }
@@ -162,7 +174,7 @@ public class ShadowbaneCacheExporter implements Runnable {
     public final void setOutput(final File outputDir) {
         this.output = outputDir;
     }
-    
+
     /**
      * File object representing Shadowbane's cache directory. This
      * is the directory that contains the .cache resource files.

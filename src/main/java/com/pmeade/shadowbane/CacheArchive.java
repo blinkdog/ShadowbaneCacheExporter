@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
+import static com.pmeade.shadowbane.util.Data.UI;
+
 /**
  * CacheArchive represents a .cache archive file that contains
  * resources. In some .cache files, the resources are compressed.
@@ -40,15 +42,6 @@ import java.util.zip.Inflater;
  */
 abstract public class CacheArchive
 {
-    /**
-     * Convert an int to an unsigned int.
-     * @param x int to be converted to an unsigned int
-     * @return long containing the unsigned int value provided in x
-     */
-    public static final long UI(int x) {
-        return x & 0x00000000ffffffffL;
-    }
-
     /**
      * Construct a CacheArchive for the provided file name.
      * @param cacheFileName name of the cache file
@@ -80,11 +73,11 @@ abstract public class CacheArchive
             numResources = UI(ib.get());
             dataOffset = UI(ib.get());
             fileSize = UI(ib.get());
-            
+
             if(fileSize != cacheFile.length()) {
                 System.err.println("BAD MOJO: fileSize:" + fileSize + " vs. cacheFile.length():" + cacheFile.length());
             }
-            
+
             for(int i=0; i<numResources; i++) {
                 CacheResource cacheResource = new CacheResource();
                 ib.position(i*5 + 5); // i*5 (5 ints per record)
@@ -144,18 +137,18 @@ abstract public class CacheArchive
      * Number of resources contained in the cache archive file.
      */
     protected long numResources;
-    
+
     /**
      * Offset to the beginning of the cache resource data. The offset
      * is relative to the beginning of the cache archive file.
      */
     protected long dataOffset;
-    
+
     /**
      * The size of the cache archive file.
      */
     protected long fileSize;
-    
+
     /**
      * List of CacheResources. After the read() method is called, this list
      * is populated with the metadata for each of the resources contained in

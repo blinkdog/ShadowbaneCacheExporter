@@ -125,7 +125,7 @@ public class TexturesResource
                 "png",
                 new File(
                     outputDir,
-                    String.format("Texture_%d_%d.png",
+                    String.format("Texture_%04d_%07d.png",
                         resource.index, resource.id
             )));
         } catch (IOException e) {
