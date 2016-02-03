@@ -19,6 +19,7 @@
 package com.pmeade.shadowbane.mesh;
 
 import com.pmeade.shadowbane.CacheResource;
+import com.pmeade.shadowbane.type.MeshAfter;
 import com.pmeade.shadowbane.type.TriFace;
 import com.pmeade.shadowbane.type.Vector2;
 import com.pmeade.shadowbane.type.Vector3;
@@ -31,11 +32,12 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.pmeade.shadowbane.type.MeshAfter.getMeshAfter;
 import static com.pmeade.shadowbane.type.TriFace.getTriFace;
 import static com.pmeade.shadowbane.type.Vector2.getVector2;
 import static com.pmeade.shadowbane.type.Vector3.getVector3;
 import static com.pmeade.shadowbane.util.Data.UI;
-import static org.apache.commons.lang3.StringUtils.join;
+//import static org.apache.commons.lang3.StringUtils.join;
 
 /**
  * MeshResource represents a mesh resource. A mesh is 3D data for a
@@ -52,18 +54,25 @@ import static org.apache.commons.lang3.StringUtils.join;
  */
 public class MeshResource
 {
-// join() polyfill; free to a good home
-//    public static String join(String[] array, String joiner) {
-//        StringBuilder sb = new StringBuilder();
-//        for(int i=0; i<array.length-1; i++) {
-//            sb.append(array[i]);
-//            sb.append(joiner);
-//        }
-//        if(array.length > 0) {
-//            sb.append(array[array.length-1]);
-//        }
-//        return sb.toString();
-//    }
+    /**
+     * Combine the provided array of String objects, placing
+     * the joiner String between each one.
+     * @param array String[] to be joined into a single String
+     * @param joiner joiner string to be inserted between each pair in
+     *               the array of provided strings
+     * @return String combining the provided String[], properly joined
+     */
+    public static String join(String[] array, String joiner) {
+        StringBuilder sb = new StringBuilder();
+        for(int i=0; i<array.length-1; i++) {
+            sb.append(array[i]);
+            sb.append(joiner);
+        }
+        if(array.length > 0) {
+            sb.append(array[array.length-1]);
+        }
+        return sb.toString();
+    }
     
     /**
      * Python code added before the polygon mesh data. It imports the
@@ -130,7 +139,9 @@ public class MeshResource
         this.vertices = new ArrayList();
         this.normals = new ArrayList();
         this.uvs = new ArrayList();
+        this.extras = new ArrayList();
         this.triFaces = new ArrayList();
+        this.afters = new ArrayList();
     }
 
     /**
@@ -188,30 +199,39 @@ public class MeshResource
             System.err.println("BAD MOJO: numUV:" + numUV + " vs. numNormals:" + numNormals);
         }
 
-        //System.out.println("buffer.position[TriFaces] = " + buffer.position() + " [0x" + Integer.toHexString(buffer.position()) + "]");
-        if(flag2 == 0) {
-            numTriFaces = buffer.getInt();
-            if(numTriFaces % 3 == 0) {
-                numTriFaces /= 3;
-                for(int i=0; i<numTriFaces; i++) {
-                    TriFace triFace = getTriFace(buffer);
-                    if(   (triFace.v1 >= numVertices)
-                       || (triFace.v2 >= numVertices)
-                       || (triFace.v3 >= numVertices))
-                    {
-                        System.err.println("BAD MOJO: TriFace " + i);
-                        System.err.println("BAD MOJO: triFace.v1:" + triFace.v1 + " vs. numVertices:" + numVertices);
-                        System.err.println("BAD MOJO: triFace.v2:" + triFace.v2 + " vs. numVertices:" + numVertices);
-                        System.err.println("BAD MOJO: triFace.v3:" + triFace.v3 + " vs. numVertices:" + numVertices);
-                        triFaces.clear();
-                        break;
-                    }
-                    triFaces.add(triFace);
-                }
-            } else {
-//                System.err.println("BAD MOJO: [" + resource.index + "] numTriFaces:" + numTriFaces + " vs. % 3:" + (numTriFaces % 3));
-//                System.err.println("\\__ buffer.position[TriFaces-Data] = " + buffer.position() + " [0x" + Integer.toHexString(buffer.position()) + "]");
+        if(flag2 == 1) {
+            // System.out.println("buffer.position[Extras] = " + buffer.position() + " [0x" + Integer.toHexString(buffer.position()) + "]");
+            numExtras = buffer.getInt();
+            for(int i=0; i<numExtras; i++) {
+                extras.add(getVector3(buffer));
             }
+            
+            if(numExtras != numVertices) {
+                System.err.println("BAD MOJO: numExtras:" + numExtras + " vs. numVertices:" + numVertices);
+            }
+        }
+        
+        //System.out.println("buffer.position[TriFaces] = " + buffer.position() + " [0x" + Integer.toHexString(buffer.position()) + "]");
+        numTriFaces = buffer.getInt();
+        numTriFaces /= 3;
+        for(int i=0; i<numTriFaces; i++) {
+            triFaces.add(getTriFace(buffer));
+        }
+        
+        //System.out.println("buffer.position[Afters] = " + buffer.position() + " [0x" + Integer.toHexString(buffer.position()) + "]");
+        numAfter = buffer.getInt();
+        for(int i=0; i<numAfter; i++) {
+            MeshAfter meshAfter = getMeshAfter(buffer);
+            afters.add(meshAfter);
+            if(meshAfter.u1 != 1) {
+                System.err.println("BAD MOJO: meshAfter.u1:" + meshAfter.u1 + " vs. 1");
+            }
+            if((meshAfter.u2 != 0) && (meshAfter.u2 != 1)) {
+                System.err.println("BAD MOJO: meshAfter.u2:" + meshAfter.u2 + " vs. 1");
+            }
+        }
+        if(buffer.position() != resource.data.length) {
+            System.err.println("BAD MOJO: buffer.position():" + buffer.position() + " [0x" + Integer.toHexString(buffer.position()) + "] vs. resource.data.length:" + resource.data.length);
         }
     }
 
@@ -242,8 +262,8 @@ public class MeshResource
         ps.println("#-----------------------------------------------------------------------");
         ps.println("# File: " + scriptName);
         ps.println("#-----------------------------------------------------------------------");
-        ps.println("# Contains polygon mesh data from Shadowbane, published by Ubisoft, Inc.");
-        ps.println("# Shadowbane is Copyright 2003-2004 Wolfpack Studios, Inc.");
+        ps.println("# Contains data from Shadowbane, published by Ubisoft, Inc.");
+        ps.println("# Shadowbane is Copyright 2002-2004 Wolfpack Studios, Inc.");
         ps.println("#-----------------------------------------------------------------------");
         ps.println(join(PYTHON_HEADER, "\n"));
         
@@ -300,7 +320,13 @@ public class MeshResource
 
     private int numUV;
     private final List<Vector2> uvs;
+
+    private int numExtras;
+    private final List<Vector3> extras;
     
     private int numTriFaces;
     private final List<TriFace> triFaces;
+    
+    private int numAfter;
+    private final List<MeshAfter> afters;
 }

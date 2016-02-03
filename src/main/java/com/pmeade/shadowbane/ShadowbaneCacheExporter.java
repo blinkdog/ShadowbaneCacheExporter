@@ -20,6 +20,7 @@ package com.pmeade.shadowbane;
 
 import com.pmeade.shadowbane.mesh.MeshCache;
 import com.pmeade.shadowbane.sound.SoundCache;
+import com.pmeade.shadowbane.terrain.TerrainAlphaCache;
 import com.pmeade.shadowbane.textures.TexturesCache;
 import java.io.File;
 
@@ -42,7 +43,7 @@ public class ShadowbaneCacheExporter implements Runnable {
     public static void main(final String[] args) {
         // if we weren't provided with enough arguments
         if(args.length < 2) {
-            System.out.println("Usage: export-cache /path/to/cache /path/to/output");
+            System.out.println("Usage: java -jar ShadowbaneCacheExporter-X.Y.Z.jar /path/to/cache /path/to/output");
             System.exit(EXIT_SUCCESS);
         }
 
@@ -140,7 +141,15 @@ public class ShadowbaneCacheExporter implements Runnable {
         soundCache = null;
 
         // TerrainAlpha.cache
-        // TODO: Implement TerrainAlphaCache
+        TerrainAlphaCache terrainAlphaCache = new TerrainAlphaCache(cache);
+        for(int i=0; i<terrainAlphaCache.size(); i++) {
+            terrainAlphaCache.export(i, output);
+        }
+        System.out.println(String.format(
+            "ShadowbaneCacheExporter exported %d TerrainAlpha resources.",
+            terrainAlphaCache.size()
+        ));
+        terrainAlphaCache = null;
 
         // Textures.cache
         TexturesCache texturesCache = new TexturesCache(cache);

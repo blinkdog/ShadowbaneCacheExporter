@@ -10,14 +10,10 @@ Running the program is straightforward. Run the jar, supplying the
 path to Shadowbane's cache directory and the path to where the
 resources should be exported.
 
-There is a convenience script `export-cache` in the root of the
-project that can be used to run the ShadowbaneCacheExporter after
-building from source:
-
-    ./export-cache /path/to/cache /path/to/output
+    java -jar target/ShadowbaneCacheExporter-X.Y.Z.jar /path/to/cache /path/to/output
 
 ## Resources
-Shadowbane had 13 .cache files containing well over 100,000 resources.
+Shadowbane has 13 .cache files containing well over 100,000 resources.
 
 ### Export formats
 The export format and count for each resource type is listed below:
@@ -31,7 +27,7 @@ The export format and count for each resource type is listed below:
     Render.cache
     Skeleton.cache
     Sound.cache             =>      .wav File (1086)
-    TerrainAlpha.cache
+    TerrainAlpha.cache      =>      .png File (20912)
     Textures.cache          =>      .png File (9680)
     Tile.cache
     Visual.cache
@@ -49,19 +45,22 @@ to a more common/useful format.
 * CObjects.cache - 0%
 * CZone.cache - 0%
 * Dungeon.cache - 0%
-* Mesh.cache - 97.2% (some meshes not fully understood)
+* Mesh.cache - 100% (mesh data not fully understood)
 * Motion.cache - 0%
 * Palette.cache - 0%
 * Render.cache - 0% (some code, but nothing usable)
 * Skeleton.cache
 * Sound.cache - 100%
-* TerrainAlpha.cache - 0%
+* TerrainAlpha.cache - 100% (but is .png the right format?)
 * Textures.cache - 100%
-    * Texture 7164-7166 look scrambled, but I think it's just bad data?
-    * Texture 7219 has an easter egg message for us?
-    * Texture 9679 is a photograph; the dev team perhaps?
 * Tile.cache - 0%
 * Visual.cache - 0%
+
+### Interesting exports
+Some resources contain easter eggs (messages, photographs, etc.) that
+weren't visible during Shadowbane game play. I've submitted some of
+my more interesting finds to [The Cutting Room Floor](https://tcrf.net/Shadowbane).
+Perhaps you'll discover an easter egg in the Shadowbane resources?
 
 ## Where do I get the Shadowbane .cache files?
 Shadowbane was free-to-play (f2p) during the last part of its official run.
@@ -156,8 +155,8 @@ TODO: Technical documentation
 TODO: Technical documentation
 
 ### Mesh Resources
-This documentation is a work in progress. Much of the Mesh resource
-format is understood, but certainly not all of it.
+This documentation is a work in progress. All of the Mesh resource
+format is understood, but not the meaning of all the data sections.
 
 Mesh resources have a variable length. There is a 46 byte header
 followed by the actual mesh data, in the following format:
@@ -195,24 +194,28 @@ Flag 1: Meaning Unknown
 * 0x01: Meaning Unknown
 
 Flag 2: Mesh includes extra data
-* 0x00: Meaning Unknown; Mesh is readable with current code
-* 0x01: Meaning Unknown; Mesh faces are NOT readable with current code
+* 0x00: Mesh does not contain Extras
+* 0x01: Mesh contains Extras
 
 #### Mesh resource data
 After the Mesh resource header, starting at Offset 46, begins the
-Mesh data. This subsections here are not yet fully understood.
+Mesh data. The structure of the Mesh data seems to be understood;
+how many sections, the kind and count of data in each section, etc.
+However, the MEANING of the data in each section is not yet fully
+understood.
 
-97.2% of the meshes seem to be set up the way described below.
-When Mesh Flag 2 is set to 1, the mesh data seems to include extra
-data. I haven't investigated enough to know what this extra data is.
+The oddball section is the "Extras Data". This section appears
+(and only appears) when Mesh Flag 2 is equal to 1. This flag
+being set indicates that the data will appear, otherwise it
+is omitted entirely.
 
-    Mesh Data Description
+    Mesh Data Sections (in order of appearance)
     * Vertices Data
     * Normals Data
     * UVs Data
-    * ?? Unknown Data ?? [when flag2 == 1]
-    * TriFaces Data [when flag2 == 0]
-    * ?? Unknown Data ??
+    * Extras Data [Optional: Appears iff flag2 is 1]
+    * TriFaces Data
+    * After Data
 
 ##### Mesh Data: Vertices
 The vertices data indicates the points that make up the polygon mesh.
@@ -254,6 +257,26 @@ Each float is 4 bytes, so 4*2 = 8 bytes total for a Vector2.
 Note 2: In all Mesh resources, the number of UVs has always been observed
 to be equal to the number of vertices.
 
+##### Mesh Data: Extras
+This section DOES NOT appear in all Mesh resources. If flag2 is set
+(is equal to 1) in the Mesh header, then this section will always
+appear after the UVs and before the TriFaces. If flag2 is clear
+(is equal to 0) then this section is omitted entirely, and DOES NOT
+appear in the Mesh data at all.
+
+The Offset is listed as ?? because it immediately follows the UVs data,
+which has a variable length (i.e.: depends on the number of UVs)
+
+    Offset      Size    Type    Description
+    ??          4       U32     Number of extras contained in the mesh
+    ??          N*12    V3      Mesh extras
+
+This data is pretty obviously Vector3s (3-tuple float values), but what
+these represent are as yet unknown to me.
+
+Note 1: In all Mesh resources, the number of extra vectors has always
+been observed to be equal to the number of vertices.
+
 ##### Mesh Data: TriFaces
 The TriFace data indicates the faces that make up the polygon mesh.
 
@@ -271,6 +294,29 @@ to get an accurate count of the faces.
 Note 2: TF is TriFace format. This is a tuple of 3 short (U16) values: v1, v2,
 and v3. They are simply indices into the list of vertices. The three
 vertices specify a triangle, which is a single face in the mesh.
+
+##### Mesh Data: After Data
+I call this the "after data" because it appears after the TriFace
+data. I do not know what this data represents, but I think maybe the
+short values are indices, perhaps to vertices or faces.
+
+After Data consists of a 4 byte header, followed by the specified number
+of After Data structures. If the specified number is 0, then no After Data
+structures will follow, because the end of the mesh data has been reached.
+
+    Offset      Size    Type    Description
+    0           4       U32     Count of After Data structures = N
+    4           ??      AD      After Data structures
+
+The size of an After Data structure depends on how many short values
+are part of the After Data. Each After Data structure has the following
+format:
+
+    Offset      Size    Type    Description
+    0           4       U32     Unknown (Always equals 1)
+    4           4       U32     Unknown (Always equals 0 or 1)
+    8           4       U32     Number of short values = N
+    12          N*2     U16     short data
 
 ### Motion Resources
 TODO: Technical documentation
@@ -303,7 +349,34 @@ samples are 16-bit, so the SoundResource class always sets signed = true.
 See: http://www.blitter.com/~russtopia/MIDI/~jglatt/tech/wave.htm
 
 ### TerrainAlpha Resources
-TODO: Technical documentation
+Each TerrainAlpha resource entry is exactly 16410 bytes in length.
+There is a 26 byte header followed by the terrain data, in the
+following format:
+
+    Offset      Size    Type    Description
+    0           4       U32     Width of the terrain data (always 128)
+    4           4       U32     Height of the terrain data (always 128)
+    8           4       U32     Unknown Field 3 (always 1)
+    12          4       U32     Unknown Field 4 (always 1)
+    16          4       U32     Unknown Field 5 (always 0)
+    20          1       U8      Terrain Flag 1 (always 1)
+    21          1       U8      Terrain Flag 2 (always 1)
+    22          4       U32     Length of terrain data in bytes (always 16384)
+    26          16384   U8      Terrain data (maybe height?)
+
+Note 1: For every TerrainAlpha resource, the 26 byte header always contains
+the same information. Thus it is hard to know what a field actually means.
+For example, the field I've called "width" is always 128, but so is the
+field that I've called "height"; what if they are actually backwards? :-)
+
+Note 2: The terrain data itself varies between the 20912 terrain resources.
+The squares are quite obviously spatial data of some kind; they form blocks
+that seem to fit together. My best guess is that the terrain data represents
+a height map of a 128x128 region of the world.
+
+The 20912 terrain resources arrange to form a larger picture. This is obvious
+from inspection of the PNG resources. The specific details (how many resources,
+what order they go in, etc.) are still unknown to me.
 
 ### Textures Resources
 Each Textures resource entry has a variable length. There is a 26 byte
@@ -346,15 +419,10 @@ You can build the program with the following command:
 You can then run the program from the project root directory with
 the following command:
 
-    java -cp target/'*':target/lib/'*' com.pmeade.shadowbane.ShadowbaneCacheExporter /path/to/cache /path/to/output
-
-There is also a convenience script in the project root directory that can
-be used to run the exporter:
-
-    ./export-cache /path/to/cache /path/to/output
+    java -jar target/ShadowbaneCacheExporter-X.Y.Z.jar /path/to/cache /path/to/output
 
 ## License
-ShadowbaneCacheExporter
+ShadowbaneCacheExporter  
 Copyright 2016 Patrick Meade.
 
 This program is free software: you can redistribute it and/or modify

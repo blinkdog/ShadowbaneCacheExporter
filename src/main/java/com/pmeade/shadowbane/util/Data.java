@@ -41,4 +41,13 @@ public class Data
     public static final int US(short x) {
         return x & 0x0000ffff;
     }
+    
+    /**
+     * Convert a signed byte to an unsigned byte (int).
+     * @param x byte to be converted to an unsigned byte
+     * @return int containing the unsigned byte value provided in x
+     */
+    public static final int UB(byte x) {
+        return x & 0x000000ff;
+    }
 }
