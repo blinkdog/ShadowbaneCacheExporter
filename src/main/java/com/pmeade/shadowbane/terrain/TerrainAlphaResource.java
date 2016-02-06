@@ -35,6 +35,12 @@ import static com.pmeade.shadowbane.util.Data.UB;
  */
 public class TerrainAlphaResource
 {
+    /** Defined height of a TerrainAlpha resource. */
+    public static final int HEIGHT = 128;
+
+    /** Defined width of a TerrainAlpha resource. */
+    public static final int WIDTH = 128;
+
     /**
      * Decorate a CacheResource as a TerrainAlphaResource.
      * @param resource CacheResource to be decorated
@@ -50,12 +56,12 @@ public class TerrainAlphaResource
     public void read() {
         ByteBuffer buffer = ByteBuffer.wrap(resource.data);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
-        
+
         width = buffer.getInt(0);
         if(width != 0x80) {
             System.err.println("BAD MOJO: width:" + width + " vs. 128");
         }
-        
+
         height = buffer.getInt(4);
         if(height != 0x80) {
             System.err.println("BAD MOJO: height:" + height + " vs. 128");
@@ -65,38 +71,38 @@ public class TerrainAlphaResource
         if(unk3 != 1) {
             System.err.println("BAD MOJO: unk3:" + unk3 + " vs. 1");
         }
-        
+
         unk4 = buffer.getInt(12);
         if(unk4 != 1) {
             System.err.println("BAD MOJO: unk4:" + unk4 + " vs. 1");
         }
-        
+
         unk5 = buffer.getInt(16);
         if(unk5 != 0) {
             System.err.println("BAD MOJO: unk5:" + unk5 + " vs. 0");
         }
-        
+
         flag1 = buffer.get(20);
         if(flag1 != 1) {
             System.err.println("BAD MOJO: flag1:" + flag1 + " vs. 1");
         }
-        
+
         flag2 = buffer.get(21);
         if(flag2 != 1) {
             System.err.println("BAD MOJO: flag2:" + flag2 + " vs. 1");
         }
-        
+
         length = buffer.getInt(22);
         if(length != 0x4000) {
             System.err.println("BAD MOJO: length:" + length + " vs. 16384");
         }
-        
+
         byte[] data = new byte[width*height];
         buffer.position(26);
         buffer.get(data);
-        
+
         image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
-        
+
         int dataIndex = 0;
         for(int y=0; y<height; y++) {
             for(int x=0; x<width; x++) {
@@ -108,11 +114,11 @@ public class TerrainAlphaResource
                 image.setRGB(x, y, rgba);
             }
         }
-        
+
         if(dataIndex != data.length) {
             System.err.println("BAD MOJO: dataIndex:" + dataIndex + " vs. data.length:" + data.length);
         }
-        
+
         if(buffer.position() != resource.data.length) {
             System.err.println("BAD MOJO: buffer.position():" + buffer.position() + " vs. resource.data.length:" + resource.data.length);
         }
@@ -137,7 +143,7 @@ public class TerrainAlphaResource
             System.err.println(e.getMessage());
         }
     }
-    
+
     /**
      * CacheResource to be decorated as a TerrainAlphaResource.
      */
@@ -149,7 +155,7 @@ public class TerrainAlphaResource
     //       guess of my own observations of the TerrainAlpha.cache
     //       resource data.
     //
-    
+
     private int width;
     private int height;
     private int unk3;
@@ -158,7 +164,7 @@ public class TerrainAlphaResource
     private int flag1;
     private int flag2;
     private int length;
-    
+
     /**
      * The TerrainAlpha resource data visualized as pixel data.
      */

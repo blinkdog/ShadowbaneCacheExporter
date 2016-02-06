@@ -374,9 +374,21 @@ The squares are quite obviously spatial data of some kind; they form blocks
 that seem to fit together. My best guess is that the terrain data represents
 a height map of a 128x128 region of the world.
 
-The 20912 terrain resources arrange to form a larger picture. This is obvious
-from inspection of the PNG resources. The specific details (how many resources,
-what order they go in, etc.) are still unknown to me.
+#### Terrain Maps
+The 20912 terrain resources arrange to form a larger pictures. They vary
+between a 1x1 map (containing a single TerrainAlpha resource) to 16x16
+maps (a 2048x2048 map made up of 256 individual TerrainAlpha resources).
+
+The resources seem to be in [column major](https://en.wikipedia.org/wiki/Row-major_order)
+order. That is sequential blocks build up columns, from top to bottom.
+The columns then build up a terrain map, from left to right.
+
+This version of ShadowbaneCacheExporter exports the TerrainAlpha resources
+as these larger terrain maps. The source code still contains the code needed
+to output a single block as a PNG, but advanced users will probably just
+want to get directly at the bytes anyway.
+
+Note: Compare the export of TerrainMap_06208.png to [Sevaath Mere](http://morloch.shadowbaneemulator.com/index.php/Sevaath_Mere).
 
 ### Textures Resources
 Each Textures resource entry has a variable length. There is a 26 byte

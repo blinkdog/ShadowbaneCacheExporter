@@ -30,6 +30,14 @@ import java.io.File;
  * @author pmeade
  */
 public class ShadowbaneCacheExporter implements Runnable {
+    /** To make it easier to work on specific sub-modules */
+    class Debug {
+        public static final boolean MESH = true;
+        public static final boolean SOUND = true;
+        public static final boolean TERRAIN_ALPHA = true;
+        public static final boolean TEXTURE = true;
+    };
+
     /** Standard code for successful program termination. */
     public static final int EXIT_SUCCESS = 0;
 
@@ -114,15 +122,17 @@ public class ShadowbaneCacheExporter implements Runnable {
         // Dungeon.cache
 
         // Mesh.cache
-        MeshCache meshCache = new MeshCache(cache);
-        for(int i=0; i<meshCache.size(); i++) {
-            meshCache.export(i, output);
+        if(Debug.MESH) {
+            MeshCache meshCache = new MeshCache(cache);
+            for(int i=0; i<meshCache.size(); i++) {
+                meshCache.export(i, output);
+            }
+            System.out.println(String.format(
+                "ShadowbaneCacheExporter exported %d Mesh resources.",
+                meshCache.size()
+            ));
+            meshCache = null;
         }
-        System.out.println(String.format(
-            "ShadowbaneCacheExporter exported %d Mesh resources.",
-            meshCache.size()
-        ));
-        meshCache = null;
 
         // Motion.cache
         // Palette.cache
@@ -130,37 +140,41 @@ public class ShadowbaneCacheExporter implements Runnable {
         // Skeleton.cache
 
         // Sound.cache
-        SoundCache soundCache = new SoundCache(cache);
-        for(int i=0; i<soundCache.size(); i++) {
-            soundCache.export(i, output);
+        if(Debug.SOUND) {
+            SoundCache soundCache = new SoundCache(cache);
+            for(int i=0; i<soundCache.size(); i++) {
+                soundCache.export(i, output);
+            }
+            System.out.println(String.format(
+                "ShadowbaneCacheExporter exported %d Sound resources.",
+                soundCache.size()
+            ));
+            soundCache = null;
         }
-        System.out.println(String.format(
-            "ShadowbaneCacheExporter exported %d Sound resources.",
-            soundCache.size()
-        ));
-        soundCache = null;
 
         // TerrainAlpha.cache
-        TerrainAlphaCache terrainAlphaCache = new TerrainAlphaCache(cache);
-        for(int i=0; i<terrainAlphaCache.size(); i++) {
-            terrainAlphaCache.export(i, output);
+        if(Debug.TERRAIN_ALPHA) {
+            TerrainAlphaCache terrainAlphaCache = new TerrainAlphaCache(cache);
+            terrainAlphaCache.exportTerrainMaps(output);
+            System.out.println(String.format(
+                "ShadowbaneCacheExporter exported %d TerrainAlpha maps.",
+                TerrainAlphaCache.MAPS.length
+            ));
+            terrainAlphaCache = null;
         }
-        System.out.println(String.format(
-            "ShadowbaneCacheExporter exported %d TerrainAlpha resources.",
-            terrainAlphaCache.size()
-        ));
-        terrainAlphaCache = null;
 
         // Textures.cache
-        TexturesCache texturesCache = new TexturesCache(cache);
-        for(int i=0; i<texturesCache.size(); i++) {
-            texturesCache.export(i, output);
+        if(Debug.TEXTURE) {
+            TexturesCache texturesCache = new TexturesCache(cache);
+            for(int i=0; i<texturesCache.size(); i++) {
+                texturesCache.export(i, output);
+            }
+            System.out.println(String.format(
+                "ShadowbaneCacheExporter exported %d Textures resources.",
+                texturesCache.size()
+            ));
+            texturesCache = null;
         }
-        System.out.println(String.format(
-            "ShadowbaneCacheExporter exported %d Textures resources.",
-            texturesCache.size()
-        ));
-        texturesCache = null;
 
         // Tile.cache
         // Visual.cache
