@@ -66,7 +66,7 @@ Perhaps you'll discover an easter egg in the Shadowbane resources?
 Shadowbane was free-to-play (f2p) during the last part of its official run.
 Ubisoft allowed anybody who wanted the client to download it free of charge.
 As of this writing, a download mirror still exists at FilePlanet.com:
-[Shadowbane Game Clients Downloads](http://www.fileplanet.com/95662/0/0/0/1/section/Game_Clients)
+[Shadowbane Free Game](https://www.fileplanet.com/archive/p-62669/Shadowbane-Free-Game-Win32)
 
 Alternatively, the original game DVDs are still sold on Amazon.com:
 * [Shadowbane](http://www.amazon.com/dp/B000067FDX)
@@ -388,7 +388,7 @@ as these larger terrain maps. The source code still contains the code needed
 to output a single block as a PNG, but advanced users will probably just
 want to get directly at the bytes anyway.
 
-Note: Compare the export of TerrainMap_06208.png to [Sevaath Mere](http://morloch.shadowbaneemulator.com/index.php/Sevaath_Mere).
+Note: Compare the export of TerrainMap_06208.png to [Sevaath Mere](https://morloch.shadowbaneemulator.com/index.php?title=Sevaath_Mere).
 
 ### Textures Resources
 Each Textures resource entry has a variable length. There is a 26 byte
