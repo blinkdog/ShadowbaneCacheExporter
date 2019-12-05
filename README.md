@@ -433,6 +433,32 @@ the following command:
 
     java -jar target/ShadowbaneCacheExporter-X.Y.Z.jar /path/to/cache /path/to/output
 
+### Linux Notes
+It is possible to run Shadowbane under Wine, but there are a few hoops
+to jump through to get it working.
+
+First, install the Microsoft Core Fonts. Without these, the installer
+will crash when it goes looking for one of them:
+
+    sudo apt-get --reinstall install ttf-mscorefonts-installer
+
+Then, establish a 32-bit Wine environment where Shadowbane can live:
+
+    WINEPREFIX="$HOME/sb32" WINEARCH=win32 wine wineboot
+
+Then, copy the Microsoft fonts to a place where Wine can find them:
+
+    cp -v /usr/share/fonts/truetype/msttcorefonts/* ~/sb32/drive_c/windows/Fonts/.
+
+Then you can run the installer to install Shadowbane. There are some graphics
+glitches, but you can futz with the tab key and mouse to get around them:
+
+    WINEPREFIX="$HOME/sb32" WINEARCH=win32 wine ~/Downloads/shadowbane/Shadowbane.exe
+
+The Shadowbane cache files will end up at:
+
+    ls -l "$HOME/sb32/drive_c/Program\ Files/Ubisoft/Shadowbane\ -\ Throne\ of\ Oblivion/cache"
+
 ## License
 ShadowbaneCacheExporter  
 Copyright 2016 Patrick Meade.
